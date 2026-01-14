@@ -2,8 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Components\WorknodeResource;
-use App\Components\WorkflowDefinition;
+use App\Components\BaseResource;
 use App\Services\WorkNodeService;
 use Illuminate\Http\Request;
 use Paganini\POJOs\Response;
@@ -59,7 +58,7 @@ class WorkNodeController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ];
-        $validationRules = array_merge($validationRules, WorknodeResource::getValidationRules());
+        $validationRules = array_merge($validationRules, BaseResource::getValidationRules());
         $validated = $request->validate($validationRules);
 
         $workNode = $this->workNodeService->createWorkNode($validated);
@@ -81,7 +80,7 @@ class WorkNodeController extends Controller
             'description' => 'nullable|string',
         ];
         if ($request->has('resources')) {
-            $validationRules = array_merge($validationRules, WorknodeResource::getValidationRules());
+            $validationRules = array_merge($validationRules, BaseResource::getValidationRules());
         }
         $validated = $request->validate($validationRules);
 

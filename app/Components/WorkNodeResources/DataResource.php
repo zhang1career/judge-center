@@ -1,87 +1,39 @@
 <?php
 
-namespace App\Components;
+namespace App\Components\WorkNodeResources;
 
-use Aws\S3\S3Client;
+use App\Components\BaseResource;
 use Aws\Exception\AwsException;
+use Aws\S3\S3Client;
 use Exception;
 
-class WorknodeResource
+class DataResource extends BaseResource
 {
-    /**
-     * @var string $uri The URI of the resource in OSS
-     */
-    private string $uri;
-
-    /**
-     * @var string $code Resource meta code
-     */
-    private string $code;
-
     public function __construct(string $uri, string $code)
     {
-        $this->uri = $uri;
-        $this->code = $code;
+        parent::__construct($uri, $code, self::TYPE_DATA);
 
         $this->validate();
     }
 
-    public static function fromArray(array $data): WorknodeResource
+    public static function fromArray(array $data): DataResource
     {
-        return new WorknodeResource(
+        return new self(
             $data['uri'] ?? '',
-            $data['code'] ?? ''
+            $data['code'] ?? '',
         );
     }
 
-    public function toArray(): array
-    {
-        return [
-            'uri' => $this->uri,
-            'code' => $this->code,
-        ];
-    }
-
-    private function validate()
-    {
-        if (empty($this->uri)) {
-            throw new \InvalidArgumentException('Resource URI cannot be empty');
-        }
-        if (empty($this->code)) {
-            throw new \InvalidArgumentException('Resource code cannot be empty');
-        }
-    }
-
-    public static function getValidationRules(): array
-    {
-        return [
-            'resources' => 'array',
-            'resources.*.uri' => 'required_with:resources|string',
-            'resources.*.code' => 'required_with:resources|string',
-        ];
-    }
-
-
     /**
-     * Getters
-     */
-    public function getUri(): string
-    {
-        return $this->uri;
-    }
-
-    public function getCode(): string
-    {
-        return $this->code;
-    }
-
-    /**
-     * Get content from OSS using boto3-compatible S3 API
+     * Handle the resource based on its type.
+     * - If type is DATA, call getContent() to retrieve content from OSS
+     * - If type is CONTROL, use uri as PHP method path and call the method
      *
-     * @return string|null The content of the object, or null if not found
+     * @param mixed ...$args Arguments to pass to the method (for CONTROL type)
+     * @return mixed The result of getContent() for DATA type, or the return value of the method for CONTROL type
      * @throws Exception
      */
-    public function getContent(): ?string
+    public function handle(...$args)
     {
         $endpoint = config('services.oss.endpoint');
         $accessKeyId = config('services.oss.access_key');

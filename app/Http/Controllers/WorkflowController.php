@@ -63,6 +63,7 @@ class WorkflowController extends Controller
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'sometimes|integer',
+            'stage' => 'sometimes|integer|min:0',
         ];
         $validationRules = array_merge($validationRules, WorkflowDefinition::getValidationRules());
         $validated = $request->validate($validationRules);
@@ -85,6 +86,7 @@ class WorkflowController extends Controller
             'name' => 'sometimes|string|max:255',
             'description' => 'nullable|string',
             'status' => 'sometimes|integer',
+            'stage' => 'sometimes|integer|min:0',
         ];
         if ($request->has('definition')) {
             $validationRules = array_merge($validationRules, WorkflowDefinition::getValidationRules());

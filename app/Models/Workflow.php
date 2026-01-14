@@ -34,6 +34,7 @@ class Workflow extends Model
         'definition',
         'nodes',
         'status',
+        'stage',
         'ct',
         'ut',
     ];
@@ -48,6 +49,7 @@ class Workflow extends Model
         return [
             'definition' => 'array',
             'status' => 'integer',
+            'stage' => 'integer',
         ];
     }
 }

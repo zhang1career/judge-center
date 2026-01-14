@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
-use App\Components\WorknodeResource;
+use App\Components\BaseResource;
+use App\Components\WorkNodeResources\ControlResource;
+use App\Components\WorkNodeResources\DataResource;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -55,7 +57,7 @@ class WorkNode extends Model
     /**
      * Parse resources field and build Resource instances.
      *
-     * @return WorknodeResource[]
+     * @return BaseResource[]
      */
     public function getResources(): array
     {
@@ -63,12 +65,21 @@ class WorkNode extends Model
         $resourceInstances = [];
 
         foreach ($resources as $resourceData) {
-            if (isset($resourceData['uri']) && isset($resourceData['code'])) {
-                $resourceInstances[] = new WorknodeResource(
+            if (!isset($resourceData['uri']) || !isset($resourceData['code'])) {
+                continue;
+            }
+
+            if (isset($resourceData['type']) && $resourceData['type'] === BaseResource::TYPE_CONTROL) {
+                $resourceInstances[] = new ControlResource(
                     $resourceData['uri'],
                     $resourceData['code']
                 );
+                continue;
             }
+            $resourceInstances[] = new DataResource(
+                $resourceData['uri'],
+                $resourceData['code'],
+            );
         }
 
         return $resourceInstances;

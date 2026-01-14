@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Components\WorkflowDefinition;
 use App\Constants\WorkflowStatusConstant;
 use App\Models\Workflow;
+use App\Models\WorkNode;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
@@ -12,6 +13,15 @@ use InvalidArgumentException;
 
 class WorkflowService
 {
+
+    private WorkNodeService $workNodeService;
+
+    public function __construct(WorkNodeService $workNodeService)
+    {
+        $this->workNodeService = $workNodeService;
+    }
+
+
     /**
      * Get all workflows with optional filters.
      *
@@ -71,6 +81,7 @@ class WorkflowService
                 'definition' => $definition->toArray(),
                 'nodes' => $nodes,
                 'status' => $data['status'] ?? WorkflowStatusConstant::DRAFT,
+                'stage' => $data['stage'] ?? 0,
                 'ct' => $currentTime,
                 'ut' => $currentTime,
             ]);
@@ -102,6 +113,9 @@ class WorkflowService
             }
             if (isset($data['status'])) {
                 $updateData['status'] = $data['status'];
+            }
+            if (isset($data['stage'])) {
+                $updateData['stage'] = $data['stage'];
             }
             if (isset($data['definition'])) {
                 // Validate and parse definition
@@ -135,6 +149,36 @@ class WorkflowService
             $workflow = Workflow::findOrFail($id);
             return $workflow->delete();
         });
+    }
+
+    /**
+     * Get the current work node based on workflow stage.
+     *
+     * @param int $workflowId
+     * @return WorkNode|null
+     * @throws ModelNotFoundException
+     */
+    public function getCurrentWorkNode(int $workflowId): ?WorkNode
+    {
+        $workflow = Workflow::findOrFail($workflowId);
+
+        // Get workflow definition
+        $definition = WorkflowDefinition::fromArray($workflow->definition);
+        $nodes = $definition->getNodes();
+
+        // Get current stage (node index)
+        $currentIndex = $workflow->stage ?? 0;
+
+        // Check if current index is valid
+        if ($currentIndex < 0 || $currentIndex >= count($nodes)) {
+            return null;
+        }
+
+        // Get the node ID at current index
+        $nodeId = $nodes[$currentIndex];
+
+        // Get the work node by ID
+        return $this->workNodeService->getWorkNodeById($nodeId);
     }
 
     /**

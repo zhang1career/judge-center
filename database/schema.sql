@@ -11,10 +11,12 @@ CREATE TABLE IF NOT EXISTS `flow` (
     `definition` TEXT NULL COMMENT 'Workflow definition in JSON format',
     `nodes` VARCHAR(1000) NOT NULL DEFAULT '' COMMENT 'Comma-separated list of node IDs',
     `status` INT NOT NULL DEFAULT 0 COMMENT 'Workflow status: 0=draft, 1=pending, 2=active, 3=completed, 4=failed',
+    `stage` INT NOT NULL DEFAULT 0 COMMENT 'Current workflow node index (0-based), indicating which node the workflow is currently at',
     `ct` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Create timestamp, in milliseconds since epoch',
     `ut` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Update timestamp, in milliseconds since epoch',
     PRIMARY KEY (`id`),
-    INDEX `idx_flow_status` (`status`)
+    INDEX `idx_flow_status` (`status`),
+    INDEX `idx_flow_stage` (`stage`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
 COMMENT='work flow';
 
