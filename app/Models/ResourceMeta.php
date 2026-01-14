@@ -17,6 +17,13 @@ class ResourceMeta extends Model
     protected $table = 'resource_meta';
 
     /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -25,5 +32,7 @@ class ResourceMeta extends Model
         'name',
         'description',
         'code',
+        'ct',
+        'ut',
     ];
 }

@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS `flow` (
     `description` TEXT NULL COMMENT 'Workflow description',
     `definition` TEXT NULL COMMENT 'Workflow definition in JSON format',
     `nodes` VARCHAR(1000) NOT NULL DEFAULT '' COMMENT 'Comma-separated list of node IDs',
-    `status` INT NOT NULL DEFAULT 0 COMMENT 'Workflow status: 0=pending, 1=active, 2=completed, 3=failed',
+    `status` INT NOT NULL DEFAULT 0 COMMENT 'Workflow status: 0=draft, 1=pending, 2=active, 3=completed, 4=failed',
     `ct` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Create timestamp, in milliseconds since epoch',
     `ut` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Update timestamp, in milliseconds since epoch',
     PRIMARY KEY (`id`),
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS `node` (
     `description` TEXT NULL COMMENT 'Node description',
     `node_type` INT NOT NULL DEFAULT 0 COMMENT 'Type of node: 0=task, 1=decision',
     `resources` VARCHAR(1000) NOT NULL DEFAULT '' COMMENT 'Resources required for the node, comma-separated',
-    `actions` VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'Comma-separated list of actions for the node, 0=approve, 1=reject',
+    `actions` VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'Comma-separated list of actions for the node, 0=reject, 1=approve',
     `ct` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Create timestamp, in milliseconds since epoch',
     `ut` BIGINT UNSIGNED NOT NULL DEFAULT 0 COMMENT 'Update timestamp, in milliseconds since epoch',
     PRIMARY KEY (`id`)

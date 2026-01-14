@@ -6,25 +6,73 @@ use Aws\S3\S3Client;
 use Aws\Exception\AwsException;
 use Exception;
 
-class Resource
+class WorknodeResource
 {
+    /**
+     * @var string $uri The URI of the resource in OSS
+     */
     private string $uri;
-    private string $type;
 
-    public function __construct(string $uri, string $type)
+    /**
+     * @var string $code Resource meta code
+     */
+    private string $code;
+
+    public function __construct(string $uri, string $code)
     {
         $this->uri = $uri;
-        $this->type = $type;
+        $this->code = $code;
+
+        $this->validate();
     }
 
+    public static function fromArray(array $data): WorknodeResource
+    {
+        return new WorknodeResource(
+            $data['uri'] ?? '',
+            $data['code'] ?? ''
+        );
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'uri' => $this->uri,
+            'code' => $this->code,
+        ];
+    }
+
+    private function validate()
+    {
+        if (empty($this->uri)) {
+            throw new \InvalidArgumentException('Resource URI cannot be empty');
+        }
+        if (empty($this->code)) {
+            throw new \InvalidArgumentException('Resource code cannot be empty');
+        }
+    }
+
+    public static function getValidationRules(): array
+    {
+        return [
+            'resources' => 'array',
+            'resources.*.uri' => 'required_with:resources|string',
+            'resources.*.code' => 'required_with:resources|string',
+        ];
+    }
+
+
+    /**
+     * Getters
+     */
     public function getUri(): string
     {
         return $this->uri;
     }
 
-    public function getType(): string
+    public function getCode(): string
     {
-        return $this->type;
+        return $this->code;
     }
 
     /**

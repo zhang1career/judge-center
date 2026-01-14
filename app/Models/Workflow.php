@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Workflow extends Model
 {
@@ -18,6 +17,13 @@ class Workflow extends Model
     protected $table = 'flow';
 
     /**
+     * Indicates if the model should be timestamped.
+     *
+     * @var bool
+     */
+    public $timestamps = false;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -28,6 +34,8 @@ class Workflow extends Model
         'definition',
         'nodes',
         'status',
+        'ct',
+        'ut',
     ];
 
     /**

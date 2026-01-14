@@ -1,14 +1,15 @@
 <?php
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Paganini\Constants\ResponseConstant;
 use Paganini\Exceptions\BaseException;
 use Paganini\POJOs\Response;
+use Paganini\POJOs\ResponseEmbeddedError;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -68,7 +69,13 @@ return Application::configure(basePath: dirname(__DIR__))
             if ($e instanceof ValidationException) {
                 $message = 'Validation failed';
                 return response()->json(
-                    Response::failWithCode(ResponseConstant::RET_INVALID_PARAM, $message)->toArray());
+                    Response::failWithDetail(
+                        ResponseConstant::RET_INVALID_PARAM,
+                        $message,
+                        [
+                            new ResponseEmbeddedError($e->getMessage()),
+                        ]
+                    )->toArray());
             }
 
             // Handle ModelNotFoundException
