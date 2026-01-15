@@ -3,10 +3,12 @@
 namespace App\Services;
 
 use App\Constants\ActionTypeContent;
+use App\Constants\WorkNodeTypeConstant;
 use App\Models\WorkNode;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use InvalidArgumentException;
 
 class WorkNodeService
 {
@@ -47,14 +49,27 @@ class WorkNodeService
      */
     public function createWorkNode(array $data): WorkNode
     {
-        $currentTime = (int)(now()->timestamp * 1000);
+        // Validations
+        // CONTROL node should not have resources of DATA type and vice versa
+        if (isset($data['type']) && isset($data['resources']) && is_array($data['resources'])) {
+            foreach ($data['resources'] as $resource) {
+                if ($data['type'] === WorkNodeTypeConstant::TYPE_DATA && $resource['type'] !== WorkNodeTypeConstant::TYPE_DATA) {
+                    throw new InvalidArgumentException('DATA type work node cannot have CONTROL type resources.');
+                }
+                if ($data['type'] === WorkNodeTypeConstant::TYPE_CONTROL && $resource['type'] !== WorkNodeTypeConstant::TYPE_CONTROL) {
+                    throw new InvalidArgumentException('CONTROL type work node cannot have DATA type resources.');
+                }
+            }
+        }
 
+        $currentTime = (int)(now()->timestamp * 1000);
         return DB::transaction(function () use ($data, $currentTime) {
             return WorkNode::create([
                 'name' => $data['name'],
                 'description' => $data['description'] ?? null,
+                'type' => $data['type'] ?? WorkNodeTypeConstant::TYPE_DATA,
                 'resources' => $data['resources'] ?? [],
-                'actions' => [ActionTypeContent::REJECT, ActionTypeContent::APPROVE],
+                'actions' => [ActionTypeContent::REJECT, ActionTypeContent::APPROVE, ActionTypeContent::PUSHBACK],
                 'ct' => $currentTime,
                 'ut' => $currentTime,
             ]);
@@ -71,8 +86,20 @@ class WorkNodeService
      */
     public function updateWorkNode(int $id, array $data): WorkNode
     {
-        $currentTime = (int)(now()->timestamp * 1000);
+        // Validations
+        // CONTROL node should not have resources of DATA type and vice versa
+        if (isset($data['type']) && isset($data['resources']) && is_array($data['resources'])) {
+            foreach ($data['resources'] as $resource) {
+                if ($data['type'] === WorkNodeTypeConstant::TYPE_DATA && $resource['type'] !== WorkNodeTypeConstant::TYPE_DATA) {
+                    throw new InvalidArgumentException('DATA type work node cannot have CONTROL type resources.');
+                }
+                if ($data['type'] === WorkNodeTypeConstant::TYPE_CONTROL && $resource['type'] !== WorkNodeTypeConstant::TYPE_CONTROL) {
+                    throw new InvalidArgumentException('CONTROL type work node cannot have DATA type resources.');
+                }
+            }
+        }
 
+        $currentTime = (int)(now()->timestamp * 1000);
         return DB::transaction(function () use ($id, $data, $currentTime) {
             $workNode = WorkNode::findOrFail($id);
 
@@ -83,10 +110,15 @@ class WorkNodeService
             if (isset($data['description'])) {
                 $updateData['description'] = $data['description'];
             }
+            if (isset($data['type'])) {
+                $updateData['type'] = $data['type'];
+            }
             if (isset($data['resources'])) {
                 $updateData['resources'] = $data['resources'];
             }
-
+            if (isset($data['actions'])) {
+                $updateData['actions'] = $data['actions'];
+            }
             if (!empty($updateData)) {
                 $updateData['ut'] = $currentTime;
                 $workNode->update($updateData);

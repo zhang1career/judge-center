@@ -3,6 +3,7 @@
 namespace App\Components\WorkNodeResources;
 
 use App\Components\BaseResource;
+use App\Constants\WorkNodeTypeConstant;
 use Aws\Exception\AwsException;
 use Aws\S3\S3Client;
 use Exception;
@@ -11,7 +12,7 @@ class DataResource extends BaseResource
 {
     public function __construct(string $uri, string $code)
     {
-        parent::__construct($uri, $code, self::TYPE_DATA);
+        parent::__construct($uri, $code, WorkNodeTypeConstant::TYPE_DATA);
 
         $this->validate();
     }
@@ -35,6 +36,10 @@ class DataResource extends BaseResource
      */
     public function handle(...$args)
     {
+
+        var_dump('dddddddddd');
+
+
         $endpoint = config('services.oss.endpoint');
         $accessKeyId = config('services.oss.access_key');
         $secretAccessKey = config('services.oss.secret_key');

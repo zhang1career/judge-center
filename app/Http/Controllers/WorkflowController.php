@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Components\WorkflowDefinition;
+use App\Constants\ActionTypeContent;
+use App\Constants\WorkflowResultConstant;
+use App\Constants\WorkflowStatusConstant;
 use App\Services\WorkflowService;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
 use Paganini\POJOs\Response;
 
 class WorkflowController extends Controller
@@ -43,10 +47,6 @@ class WorkflowController extends Controller
     public function show(int $id): array
     {
         $workflow = $this->workflowService->getWorkflowById($id);
-
-        if (!$workflow) {
-            return Response::error('Workflow not found', 404)->toArray();
-        }
 
         return Response::success($workflow)->toArray();
     }
@@ -109,5 +109,65 @@ class WorkflowController extends Controller
         $this->workflowService->deleteWorkflow($id);
 
         return Response::success()->toArray();
+    }
+
+    /**
+     * Process a workflow (approval flow operation).
+     *
+     * @param Request $request
+     * @param int $id
+     * @return array
+     */
+    public function process(Request $request, int $id): array
+    {
+        $workflow = $this->workflowService->getWorkflowById($id);
+        if (!$workflow) {
+            throw new InvalidArgumentException('Workflow not found');
+        }
+        if (!$workflow->checkProcessable()) {
+            throw new InvalidArgumentException('Workflow is draft or already completed');
+        }
+
+        $validActions = [
+            ActionTypeContent::REJECT,
+            ActionTypeContent::APPROVE,
+            ActionTypeContent::PUSHBACK,
+        ];
+
+        $validated = $request->validate([
+            'stage' => 'required|integer|min:0',
+            'action' => ['required', 'integer', 'in:' . implode(',', $validActions)],
+        ]);
+
+        $workflow = $this->workflowService->processWorkflow($id, $validated['stage'], $validated['action']);
+
+        return Response::success($workflow)->toArray();
+    }
+
+    /**
+     * Reset a workflow to initial state.
+     *
+     * @param Request $request
+     * @param int $id
+     * @return array
+     */
+    public function reset(Request $request, int $id): array
+    {
+        $workflow = $this->workflowService->getWorkflowById($id);
+        if (!$workflow) {
+            throw new InvalidArgumentException('Workflow not found');
+        }
+
+        if ($workflow->length() <= 0) {
+            throw new InvalidArgumentException('Workflow definition is empty');
+        }
+
+        $workflow = $this->workflowService->updateWorkflow($id, [
+            'status' => WorkflowStatusConstant::PENDING,
+            'stage' => 0,
+            'result' => WorkflowResultConstant::DEFAULT,
+        ]);
+
+        return Response::success($workflow)->toArray();
     }
 }

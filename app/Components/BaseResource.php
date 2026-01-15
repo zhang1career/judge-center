@@ -2,14 +2,11 @@
 
 namespace App\Components;
 
+use App\Constants\WorkNodeTypeConstant;
+use InvalidArgumentException;
+
 abstract class BaseResource
 {
-    /**
-     * Resource type constants
-     */
-    public const TYPE_DATA = 'DATA';
-    public const TYPE_CONTROL = 'CONTROL';
-
     /**
      * @var string $uri The URI of the resource in OSS
      */
@@ -47,13 +44,13 @@ abstract class BaseResource
     protected function validate()
     {
         if (empty($this->uri)) {
-            throw new \InvalidArgumentException('Resource URI cannot be empty');
+            throw new InvalidArgumentException('Resource URI cannot be empty');
         }
         if (empty($this->code)) {
-            throw new \InvalidArgumentException('Resource code cannot be empty');
+            throw new InvalidArgumentException('Resource code cannot be empty');
         }
-        if (!in_array($this->type, [self::TYPE_DATA, self::TYPE_CONTROL], true)) {
-            throw new \InvalidArgumentException('Resource type must be either DATA or CONTROL');
+        if (!in_array($this->type, [WorkNodeTypeConstant::TYPE_DATA, WorkNodeTypeConstant::TYPE_CONTROL])) {
+            throw new InvalidArgumentException('Resource type must be either DATA or CONTROL, invalid type: ' . $this->type);
         }
     }
 
@@ -63,7 +60,7 @@ abstract class BaseResource
             'resources' => 'array',
             'resources.*.uri' => 'required_with:resources|string',
             'resources.*.code' => 'required_with:resources|string',
-            'resources.*.type' => 'sometimes|string|in:DATA,CONTROL',
+            'resources.*.type' => 'sometimes|int|in:0,1',
         ];
     }
 

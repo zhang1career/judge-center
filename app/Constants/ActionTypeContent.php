@@ -6,4 +6,5 @@ class ActionTypeContent
 {
     public const REJECT = 0;
     public const APPROVE = 1;
+    public const PUSHBACK = 2;
 }

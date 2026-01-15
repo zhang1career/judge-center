@@ -57,6 +57,7 @@ class WorkNodeController extends Controller
         $validationRules = [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'type' => 'required|int|in:0,1',
         ];
         $validationRules = array_merge($validationRules, BaseResource::getValidationRules());
         $validated = $request->validate($validationRules);
@@ -78,6 +79,7 @@ class WorkNodeController extends Controller
         $validationRules = [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'type' => 'required|int|in:0,1',
         ];
         if ($request->has('resources')) {
             $validationRules = array_merge($validationRules, BaseResource::getValidationRules());

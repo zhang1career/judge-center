@@ -3,13 +3,14 @@
 namespace App\Components\WorkNodeResources;
 
 use App\Components\BaseResource;
+use App\Constants\WorkNodeTypeConstant;
 use Exception;
 
 class ControlResource extends BaseResource
 {
     public function __construct(string $uri, string $code)
     {
-        parent::__construct($uri, $code, self::TYPE_CONTROL);
+        parent::__construct($uri, $code, WorkNodeTypeConstant::TYPE_CONTROL);
 
         $this->validate();
     }
@@ -37,7 +38,7 @@ class ControlResource extends BaseResource
         $methodPath = $this->uri;
 
         // Check if it's a static method call (contains ::)
-        if (strpos($methodPath, '::') !== false) {
+        if (str_contains($methodPath, '::')) {
             [$class, $method] = explode('::', $methodPath, 2);
 
             if (!class_exists($class)) {

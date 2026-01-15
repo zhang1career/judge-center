@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Constants\WorkflowStatusConstant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -35,6 +36,7 @@ class Workflow extends Model
         'nodes',
         'status',
         'stage',
+        'result',
         'ct',
         'ut',
     ];
@@ -50,6 +52,29 @@ class Workflow extends Model
             'definition' => 'array',
             'status' => 'integer',
             'stage' => 'integer',
+            'result' => 'integer',
         ];
+    }
+
+    /**
+     * Get the number of nodes in the workflow definition.
+     *
+     * @return int
+     */
+    public function length()
+    {
+        return sizeof($this->definition['nodes'] ?? []);
+    }
+
+    /**
+     * Check if the workflow is in a processable state.
+     *
+     * @return bool
+     */
+    public function checkProcessable(): bool
+    {
+        return $this->status != WorkflowStatusConstant::DRAFT
+            && $this->status != WorkflowStatusConstant::COMPLETED
+            && $this->status != WorkflowStatusConstant::FAILED;
     }
 }

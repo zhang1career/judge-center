@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Components\BaseResource;
 use App\Components\WorkNodeResources\ControlResource;
 use App\Components\WorkNodeResources\DataResource;
+use App\Constants\WorkNodeTypeConstant;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -35,6 +36,7 @@ class WorkNode extends Model
     protected $fillable = [
         'name',
         'description',
+        'type',
         'resources',
         'actions',
         'ct',
@@ -69,7 +71,7 @@ class WorkNode extends Model
                 continue;
             }
 
-            if (isset($resourceData['type']) && $resourceData['type'] === BaseResource::TYPE_CONTROL) {
+            if (isset($resourceData['type']) && $resourceData['type'] === WorkNodeTypeConstant::TYPE_CONTROL) {
                 $resourceInstances[] = new ControlResource(
                     $resourceData['uri'],
                     $resourceData['code']
