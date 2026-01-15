@@ -103,5 +103,18 @@ class WorkNodeController extends Controller
 
         return Response::success()->toArray();
     }
+
+
+    public function getResources(int $id): array
+    {
+        $workNode = $this->workNodeService->getWorkNodeById($id);
+
+        $resources = $workNode->getResources();
+        foreach ($resources as $resource) {
+            $resource->handle();
+        }
+
+        return Response::success($workNode)->toArray();
+    }
 }
 

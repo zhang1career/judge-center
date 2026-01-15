@@ -34,17 +34,15 @@ class ControlResource extends BaseResource
      */
     public function handle(...$args)
     {
-        // Parse the URI as a PHP method path (e.g., "App\Services\SomeService::someMethod")
+        // Parse the URI as a PHP method path (e.g., "\\App\\Processors\\NoticeProcessor::sendEmail")
         $methodPath = $this->uri;
 
         // Check if it's a static method call (contains ::)
         if (str_contains($methodPath, '::')) {
             [$class, $method] = explode('::', $methodPath, 2);
-
             if (!class_exists($class)) {
                 throw new Exception("Class not found: {$class}");
             }
-
             if (!method_exists($class, $method)) {
                 throw new Exception("Method not found: {$class}::{$method}");
             }
